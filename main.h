@@ -1,42 +1,120 @@
-#ifndef _PRINT_FUNCTION_H_
-#define _PRINT_FUNCTION_H_
+#ifndef _PRINTF_H_
+#define _PRINTF_H_
+
 #include <stdarg.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <limits.h>
+#include <stdlib.h>
 
-int _printf(const char *format, ...);
-int pull_print(char c, va_list *ap);
+#define OUTPUT_BUF_SIZE 1024
+#define BUF_FLUSH -1
 
-int _putchar(char);
-int buffer(char a, char *s);
-int p_bin(unsigned int num);
-int exponent(int x, int y);
-int p_int(int);
-int p_string(char *);
-int p_hexstring(char *);
-int p_rev(char *s);
-int p_hexcap(unsigned int num);
-int p_octal(unsigned int num);
-int p_uint(unsigned int num);
-int p_hex(unsigned int num);
+#define FIELD_BUF_SIZE 50
 
-int mkstring(va_list *);
-int mkchar(va_list *);
-int mkint(va_list *);
-int mkbin(va_list *);
-int mkhex(va_list *);
-int mkhexcap(va_list *);
-int mkoctal(va_list *);
-int mkhexstring(va_list *);
-int mkunsigned(va_list *);
+#define NULL_STRING "(null)"
+
+#define PARAMS_INIT {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+#define CONVERT_LOWERCASE	1
+#define CONVERT_UNSIGNED	2
 
 /**
- * struct flag -flag object
- * @letter: flag char
- * @prnt: print function pointer
- * Descriptions: contains flag letter and corresponding print function
- **/
-typedef struct flag
+ * struct parameters - parameters struct
+ *
+ * @unsign: flag if unsigned value
+ *
+ * @plus_flag: on if plus_flag specified
+ * @space_flag: on if hashtag_flag specified
+ * @hashtag_flag: on if _flag specified
+ * @zero_flag: on if _flag specified
+ * @minus_flag: on if _flag specified
+ *
+ * @width: field width specified
+ * @precision: field precision specified
+ *
+ * @h_modifier: on if h_modifier is specified
+ * @l_modifier: on if l_modifier is specified
+ *
+ */
+
+typedef struct parameters
 {
-	char letter;
-	int (*prnt)(va_list *);
-} find_flag;
-#endif
+	unsigned int unsign			: 1;
+
+	unsigned int plus_flag		: 1;
+	unsigned int space_flag		: 1;
+	unsigned int hashtag_flag	: 1;
+	unsigned int zero_flag		: 1;
+	unsigned int minus_flag		: 1;
+
+	unsigned int width;
+	unsigned int precision;
+
+	unsigned int h_modifier		: 1;
+	unsigned int l_modifier		: 1;
+} params_t;
+
+/**
+ * struct specifier - Struct token
+ *
+ * @specifier: format token
+ * @f: The function associated
+ */
+typedef struct specifier
+{
+	char *specifier;
+	int (*f)(va_list, params_t *);
+} specifier_t;
+
+/* _put.c module */
+int _puts(char *str);
+int _putchar(int c);
+
+/* print_functions.c module */
+int print_char(va_list ap, params_t *params);
+int print_int(va_list ap, params_t *params);
+int print_string(va_list ap, params_t *params);
+int print_percent(va_list ap, params_t *params);
+int print_S(va_list ap, params_t *params);
+
+/* number.c module */
+char *convert(long int num, int base, int flags, params_t *params);
+int print_unsigned(va_list ap, params_t *params);
+int print_address(va_list ap, params_t *params);
+
+/* specifier.c module */
+int (*get_specifier(char *s))(va_list ap, params_t *params);
+int get_print_func(char *s, va_list ap, params_t *params);
+int get_flag(char *s, params_t *params);
+int get_modifier(char *s, params_t *params);
+char *get_width(char *s, params_t *params, va_list ap);
+
+/* convert_number.c module */
+int print_hex(va_list ap, params_t *params);
+int print_HEX(va_list ap, params_t *params);
+int print_binary(va_list ap, params_t *params);
+int print_octal(va_list ap, params_t *params);
+
+/* simple_printers.c module */
+int print_from_to(char *start, char *stop, char *except);
+int print_rev(va_list ap, params_t *params);
+int print_rot13(va_list ap, params_t *params);
+
+/* print_number.c module */
+int _isdigit(int c);
+int _strlen(char *s);
+int print_number(char *str, params_t *params);
+int print_number_right_shift(char *str, params_t *params);
+int print_number_left_shift(char *str, params_t *params);
+
+/* params.c module */
+void init_params(params_t *params, va_list ap);
+
+/* string_fields.c modoule */
+char *get_precision(char *p, params_t *params, va_list ap);
+
+/* _prinf.c module */
+int _printf(const char *format, ...);
+
+#endif /*_MAIN_H_*/
